@@ -1,0 +1,29 @@
+.channel-div {
+    padding: 10px;
+}
+
+.channel-div a {
+    text-align: center;
+    text-decoration: none;
+}
+
+.channel-title {
+    text-align: left;
+}
+
+.channel-img {
+    margin: 0 auto;
+    padding: 10px;
+}
+
+#player-container {
+    width: 100%;
+    padding: 10px;
+    border: 0;
+}
+
+#player {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
