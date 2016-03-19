@@ -1,10 +1,43 @@
 const twitchApiUrl = 'https://api.twitch.tv/kraken/';
-const twitchPlayerUrl = 'http://player.twitch.tv/?channel=';
-const twitchClientId = 'sxbdsatun8a9nrvm1z79rxho4elyyhv'; // The public part.
+//const twitchPlayerUrl = 'http://player.twitch.tv/?channel=';
+const twitchClientId = '6bxshimxrq0f8o431ez89aos2fx9c39';
 
 var currentChannelName;
 var playerActive = false;
 var player;
+
+function showChannelList(data) {
+    var channels = [];
+    $.each(data.streams, function (position, channel) {
+        var displayName = channel.channel.display_name;
+        var newEntry = "<div id='" + displayName + '\' class="channel-div col-md-6">'
+            + "<div class='channel-title'>"
+            + '<b>' + displayName + '</b> playing ' + channel.channel.game + '<br/>'
+            + channel.channel.status //.substring(0, 30)
+            + '</div>'
+            + '<img class="channel-img" src="' + channel.preview.medium + '" alt="' + displayName + '"/>'
+            + '</div>';
+        channels.push(newEntry);
+    });
+    return channels;
+}
+
+function listFollowedChannels() {
+    Twitch.api({method: 'streams/followed'}, function (error, data) {
+        var channelList = $('#channel-list');
+        channelList.html('<h1>Followed Channels</h1>');
+        if (data.streams.length === 0) {
+            channelList.append("No results found.");
+            return;
+        }
+        channelList.append(showChannelList(data).join(""));
+        // Add action listeners
+        $('.channel-div').click(function () {
+            watchChannel($(this).attr("id"));
+        });
+    });
+}
+
 
 function listChannels(game) {
     $.getJSON(twitchApiUrl + "streams?game=" + game,
@@ -20,25 +53,10 @@ function listChannels(game) {
             //var gameImg = 'http://static-cdn.jtvnw.net/ttv-boxart/' + game + '-272x380.jpg';
             //channelList.append('<div><img src="' + gameImg + '" class="center-block"/></div>');
 
-            var channels = [];
-            $.each(data.streams, function (position, channel) {
-                var displayName = channel.channel.display_name;
-                var newEntry = "<div id='" + displayName + '\' class="channel-div col-md-6">'
-                    + "<div class='channel-title'>"
-                    + '<b>' + displayName + '</b> playing ' + channel.channel.game + '<br/>'
-                    + channel.channel.status //.substring(0, 30)
-                    + '</div>'
-                    + '<img class="channel-img" src="' + channel.preview.medium + '" alt="' + displayName + '"/>'
-                    + '</div>';
-                channels.push(newEntry);
-            });
-
-            channelList.append(channels.join(""));
-
+            channelList.append(showChannelList(data).join(""));
             // Add action listeners
             $('.channel-div').click(function () {
                 watchChannel($(this).attr("id"));
-
             });
         });
 }
@@ -49,7 +67,7 @@ function watchChannel(channel) {
     }
 
     currentChannelName = channel;
-    if(playerActive && player != null) {
+    if (playerActive && player != null) {
         player.setChannel(channel);
         return;
     }
@@ -59,7 +77,7 @@ function watchChannel(channel) {
     var playerWidth = container.width() * .8;
     var playerHeight = playerWidth * 9 / 16;
     var options = {
-        width: playerWidth ,
+        width: playerWidth,
         height: playerHeight,
         channel: channel
     };
@@ -100,8 +118,13 @@ $(document).ready(function () {
     $("#player-container").hide();
     stopButton.hide();
 
-    var loginButton = $('.twitch-connect');
-    loginButton.hide();
+    $('#login-button').click(function () {
+        Twitch.login({
+            scope: ['user_read', 'user_subscriptions']
+        });
+    });
+
+    // Initialize the Twitch SDK
     Twitch.init({clientId: twitchClientId}, function (error, status) {
         if (error) {
             // error encountered while loading
@@ -110,15 +133,13 @@ $(document).ready(function () {
         // the sdk is now loaded
         if (status.authenticated) {
             // user is currently logged in
-            loginButton.hide();
+            $('#login-button').hide();
+            Twitch.api({method: 'user'}, function (error, user) {
+                $('#login-status').html(user.display_name).attr("class", "navbar-brand navbar-right");
+                listFollowedChannels();
+            });
+        } else {
+            listChannels('Dark Souls II: Scholar of the First Sin');
         }
     });
-
-    loginButton.click(function () {
-        Twitch.login({
-            scope: ['user_read', 'channel_read']
-        });
-    });
-
-    listChannels('Dark%20Souls');
 });
