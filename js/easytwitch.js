@@ -1,5 +1,4 @@
 const twitchApiUrl = 'https://api.twitch.tv/kraken/';
-//const twitchPlayerUrl = 'http://player.twitch.tv/?channel=';
 const twitchClientId = '6bxshimxrq0f8o431ez89aos2fx9c39';
 
 var currentChannelName;
@@ -73,6 +72,7 @@ function watchChannel(channel) {
     }
 
     var container = $('#player-container');
+    container.removeClass('hidden');
     container.html("");
     var playerWidth = container.width() * .8;
     var playerHeight = playerWidth * 9 / 16;
@@ -83,9 +83,9 @@ function watchChannel(channel) {
     };
     console.log(options);
     player = new Twitch.Player("player-container", options);
+    player.setQuality("chunked"); // Set to Source quality.
     container.children().attr("id", "player");
-    $('#stop-player-button').show();
-    container.show();
+    $('#stop-player-button').removeClass('hidden');
     playerActive = true;
 }
 
@@ -102,9 +102,9 @@ $(document).ready(function () {
     var stopButton = $("#stop-player-button");
     stopButton.click(function () {
         var container = $('#player-container');
-        container.hide();
+        container.addClass('hidden');
         container.html("");
-        $(this).hide();
+        $(this).addClass('hidden');
         playerActive = false;
     });
 
@@ -115,13 +115,21 @@ $(document).ready(function () {
         }
     });
 
-    $("#player-container").hide();
-    stopButton.hide();
+    $("#player-container").addClass('hidden');
+    stopButton.addClass('hidden');
 
     $('#login-button').click(function () {
         Twitch.login({
             scope: ['user_read', 'user_subscriptions']
         });
+    });
+
+    $('#logout-button').click(function () {
+        Twitch.logout(function (error) {
+            // the user is now logged out
+        });
+        showLoginStatus(false);
+        $("#channel-list").html("");
     });
 
     // Initialize the Twitch SDK
@@ -131,15 +139,24 @@ $(document).ready(function () {
             console.log(error);
         }
         // the sdk is now loaded
-        if (status.authenticated) {
-            // user is currently logged in
-            $('#login-button').hide();
-            Twitch.api({method: 'user'}, function (error, user) {
-                $('#login-status').html(user.display_name).attr("class", "navbar-brand navbar-right");
-                listFollowedChannels();
-            });
-        } else {
-            listChannels('Dark Souls II: Scholar of the First Sin');
-        }
+        showLoginStatus(status.authenticated);
     });
 });
+
+function showLoginStatus(isLoggedIn) {
+    if (isLoggedIn) {
+        // user is currently logged in
+        $('#login-menu').addClass('hidden');
+        $('#user-status-dropdown').removeClass('hidden');
+
+        Twitch.api({method: 'user'}, function (error, user) {
+            $('#login-status').text(user.display_name);
+            listFollowedChannels();
+        });
+
+    } else {
+        $('#login-menu').removeClass('hidden');
+        $('#user-status-dropdown').addClass('hidden');
+        $('#login-status').text("");
+    }
+}

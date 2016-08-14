@@ -14,20 +14,35 @@
 
 <body>
 <nav class="navbar navbar-default navbar-static-top">
-    <div class="navbar-brand">Easy Twitch</div>
-    <div id="navbar-buttons" class="navbar-form">
-        <div class="input-group">
-            <input type="text" id="game-name" class="form-control" placeholder="Game name"/>
+    <div class="container-fluid">
+        <div class="navbar-brand">Easy Twitch</div>
+        <div id="navbar-buttons" class="navbar-form">
+            <div class="input-group">
+                <input type="text" id="game-name" class="form-control" placeholder="Game name"/>
             <span class="input-group-btn">
                 <button id="search-games-button" class="btn btn-success">Search for Game</button>
             </span>
+            </div>
+            <button id="clear-button" class="btn btn-primary">Clear Results</button>
+            <button id="stop-player-button" class="btn btn-danger">Close Player</button>
         </div>
-        <button id="clear-button" class="btn btn-primary">Clear Results</button>
-        <button id="stop-player-button" class="btn btn-danger">Close Player</button>
-        <div id="login-status" class="navbar-right">
-            <button id="login-button" class="btn btn-success navbar-right">Login</button>
-        </div>
-        <!--<img src="http://ttv-api.s3.amazonaws.com/assets/connect_dark.png" class="twitch-connect"/>-->
+
+        <ul id="login-navbar" class="nav navbar-nav navbar-right">
+            <li id="login-menu" class="hidden">
+                <a href="#" id="login-button">Login with Twitch</a>
+            </li>
+            <li id="user-status-dropdown" class="dropdown hidden">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button">
+                    <div id="login-status"></div>
+                    <span class="caret"></span>
+                </a>
+                <ul class="dropdown-menu">
+                    <li>
+                        <a href="#" id="logout-button">Logout</a>
+                    </li>
+                </ul>
+            </li>
+        </ul>
     </div>
 </nav>
 
