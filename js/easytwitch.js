@@ -62,19 +62,21 @@ function listChannels(game) {
 
 function watchChannel(channel) {
     if (currentChannelName == channel && playerActive) {
+        goToPlayer();
         return;
     }
 
     currentChannelName = channel;
     if (playerActive && player != null) {
         player.setChannel(channel);
+        goToPlayer();
         return;
     }
 
     var container = $('#player-container');
     container.removeClass('hidden');
     container.html("");
-    var playerWidth = container.width() * .8;
+    var playerWidth = container.width() * .9;
     var playerHeight = playerWidth * 9 / 16;
     var options = {
         width: playerWidth,
@@ -87,6 +89,17 @@ function watchChannel(channel) {
     container.children().attr("id", "player");
     $('#stop-player-button').removeClass('hidden');
     playerActive = true;
+    //window.location.hash = '#player-container';
+    goToPlayer();
+}
+
+function goToPlayer() {
+    scroll("player-container");
+}
+
+function scroll(element) {
+    var ele = document.getElementById(element);
+    window.scrollTo(0, ele.offsetTop);
 }
 
 $(document).ready(function () {
@@ -130,6 +143,10 @@ $(document).ready(function () {
         });
         showLoginStatus(false);
         $("#channel-list").html("");
+    });
+
+    $('#following-button').click(function () {
+        listFollowedChannels();
     });
 
     // Initialize the Twitch SDK
